@@ -94,6 +94,49 @@
       </table>
     </section>
   </main>
+  
+<script>
+// ------------------------------
+// Core Loan Repayment Calculator
+// ------------------------------
+
+// Utility: convert % to decimal
+function rateToDecimal(annualRate) {
+  return (annualRate / 100) / 12; // monthly rate
+}
+
+// Calculate base monthly repayment
+function calculateMonthlyRepayment(loanAmount, annualRate, years) {
+  const n = years * 12; // total months
+  const r = rateToDecimal(annualRate);
+
+  if (r === 0) return loanAmount / n; // no interest edge case
+
+  return loanAmount * r / (1 - Math.pow(1 + r, -n));
+}
+
+// Hook into your HTML inputs
+function updateResults() {
+  const loanAmount = parseFloat(document.querySelector('[placeholder="600000"]').value) || 0;
+  const loanTerm   = parseFloat(document.querySelector('[placeholder="30"]').value) || 30;
+  const interest   = parseFloat(document.querySelector('[placeholder="6"]').value) || 6;
+
+  const monthly = calculateMonthlyRepayment(loanAmount, interest, loanTerm);
+  const total = monthly * loanTerm * 12;
+  const totalInterest = total - loanAmount;
+
+  // Update the results section
+  document.getElementById('regularRepayment').textContent = monthly.toFixed(2);
+  document.getElementById('repaymentPeriod').textContent = 'month';
+  document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
+  document.getElementById('timeSaved').textContent = 0;
+  document.getElementById('interestSaved').textContent = 0;
+}
+
+// Auto-update when page loads
+document.addEventListener('DOMContentLoaded', updateResults);
+
+</script>
 
 </body>
 </html>
