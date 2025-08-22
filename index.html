@@ -70,4 +70,20 @@ function updateResults() {
   document.getElementById('interestSaved').textContent = interestSaved.toFixed(2);
 
   // Update the little spans under sliders
-  document.get
+  document.getElementById('extraRepayDisplay').textContent = extraRepay.toLocaleString();
+  document.getElementById('offsetDisplay').textContent = offset.toLocaleString();
+  document.getElementById('lumpSumDisplay').textContent = lumpSum.toLocaleString();
+}
+
+// Auto-update when page loads
+document.addEventListener('DOMContentLoaded', () => {
+  // Hook up inputs + sliders + dropdowns
+  ['extraRepay','offset','lumpSum','loanValue','loanTerm','interestRate','repaymentFrequency']
+    .forEach(id => {
+      document.getElementById(id).addEventListener('input', updateResults);
+      document.getElementById(id).addEventListener('change', updateResults);
+    });
+
+  updateResults();
+});
+</script>
