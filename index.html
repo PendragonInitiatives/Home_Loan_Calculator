@@ -37,39 +37,40 @@ function updateResults() {
   // Base monthly repayment
   let monthly = calculateMonthlyRepayment(adjustedLoan, interest, loanTerm);
 
-  // Add extra repayment (applied per chosen frequency)
+  // Add extra repayment (per chosen frequency)
   let repayment = monthly;
   let periodLabel = "month";
 
   if (frequency === "fortnightly") {
     repayment = (monthly * 12 / 26);
     periodLabel = "fortnight";
-    repayment += extraRepay; // extra repay per fortnight
+    repayment += extraRepay;
   } else if (frequency === "weekly") {
     repayment = (monthly * 12 / 52);
     periodLabel = "week";
-    repayment += extraRepay; // extra repay per week
+    repayment += extraRepay;
   } else {
-    repayment = monthly + extraRepay; // extra repay per month
+    repayment = monthly + extraRepay;
   }
 
-  // Total interest estimate (very simplified)
-  const total = repayment * loanTerm * (frequency === "monthly" ? 12 : frequency === "fortnightly" ? 26 : 52);
+  // Total interest estimate (simplified)
+  const periods = frequency === "monthly" ? 12 : (frequency === "fortnightly" ? 26 : 52);
+  const total = repayment * loanTerm * periods;
   const totalInterest = total - adjustedLoan;
 
-  // Savings compared to base loan
+  // Compare against base loan
   const baseTotal = monthly * loanTerm * 12;
   const baseInterest = baseTotal - loanAmount;
   const interestSaved = baseInterest - totalInterest;
 
-  // Update the results section
+  // Update results section
   document.getElementById('regularRepayment').textContent = repayment.toFixed(2);
   document.getElementById('repaymentPeriod').textContent = periodLabel;
   document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
   document.getElementById('timeSaved').textContent = (interestSaved > 0 ? (interestSaved / baseInterest * loanTerm).toFixed(1) : 0);
   document.getElementById('interestSaved').textContent = interestSaved.toFixed(2);
 
-  // Update the little spans under sliders
+  // Update slider display spans
   document.getElementById('extraRepayDisplay').textContent = extraRepay.toLocaleString();
   document.getElementById('offsetDisplay').textContent = offset.toLocaleString();
   document.getElementById('lumpSumDisplay').textContent = lumpSum.toLocaleString();
