@@ -1,67 +1,64 @@
-// ----------------------------
-// Loan Calculator JavaScript
-// ----------------------------
+document.addEventListener("DOMContentLoaded", function () {
+    // Grab inputs
+    const propertyValueInput = document.getElementById("propertyValue");
+    const loanValueInput = document.getElementById("loanValue");
+    const loanTypeInput = document.getElementById("loanType");
+    const loanTermInput = document.getElementById("loanTerm");
+    const interestRateInput = document.getElementById("interestRate");
+    const repaymentTypeInput = document.getElementById("repaymentType");
 
-// Helper: Convert percent to decimal
-function toDecimal(rate) {
-  return rate / 100;
-}
+    // Levers
+    const extraRepaymentsInput = document.getElementById("extraRepayments");
+    const offsetAccountInput = document.getElementById("offsetAccount");
+    const lumpSumInput = document.getElementById("lumpSum");
+    const repaymentFrequencyInput = document.getElementById("repaymentFrequency");
 
-// Calculate monthly repayment using amortisation formula
-function calculateMonthlyRepayment(loanAmount, annualRate, years) {
-  const monthlyRate = toDecimal(annualRate) / 12;
-  const n = years * 12;
-  return loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
-}
+    // Results
+    const regularRepaymentEl = document.getElementById("regularRepayment");
+    const totalInterestEl = document.getElementById("totalInterest");
+    const timeSavedEl = document.getElementById("timeSaved");
+    const interestSavedEl = document.getElementById("interestSaved");
 
-// Update results when user changes inputs
-function updateResults() {
-  const loanAmount = parseFloat(document.getElementById("loanValue").value);
-  const interestRate = parseFloat(document.getElementById("interestRate").value);
-  const loanTerm = parseFloat(document.getElementById("loanTerm").value);
+    // Calculation function
+    function updateResults() {
+        const propertyValue = parseFloat(propertyValueInput.value) || 0;
+        const loanValue = parseFloat(loanValueInput.value) || 0;
+        const loanTerm = parseInt(loanTermInput.value) || 0;
+        const interestRate = parseFloat(interestRateInput.value) / 100 || 0;
 
-  // Repayment frequency
-  const frequency = document.getElementById("repaymentFrequency").value;
+        const extraRepayments = parseFloat(extraRepaymentsInput.value) || 0;
+        const offsetAccount = parseFloat(offsetAccountInput.value) || 0;
+        const lumpSum = parseFloat(lumpSumInput.value) || 0;
+        const repaymentFrequency = repaymentFrequencyInput.value;
 
-  // Calculate base monthly repayment
-  const monthlyPayment = calculateMonthlyRepayment(loanAmount, interestRate, loanTerm);
+        // --- Example repayment formula ---
+        // Monthly repayment (P&I) = [P * r * (1+r)^n] / [(1+r)^n - 1]
+        const n = loanTerm * 12;
+        const r = interestRate / 12;
+        let repayment = 0;
 
-  // Adjust for frequency
-  let regularRepayment = monthlyPayment;
-  if (frequency === "weekly") {
-    regularRepayment = monthlyPayment * 12 / 52;
-  } else if (frequency === "fortnightly") {
-    regularRepayment = monthlyPayment * 12 / 26;
-  }
+        if (r > 0) {
+            repayment = (loanValue * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        } else {
+            repayment = loanValue / n;
+        }
 
-  // Extra repayments
-  const extraRepayment = parseFloat(document.getElementById("extraRepayment").value) || 0;
-  const offset = parseFloat(document.getElementById("offsetAmount").value) || 0;
-  const lumpSum = parseFloat(document.getElementById("lumpSum").value) || 0;
+        // Update results section
+        regularRepaymentEl.textContent = `$${repayment.toFixed(2)} per month`;
+        totalInterestEl.textContent = `$${(repayment * n - loanValue).toFixed(2)}`;
+        timeSavedEl.textContent = "0 years"; // placeholder until extra repayments are applied
+        interestSavedEl.textContent = "$0";  // placeholder
+    }
 
-  // Apply offset
-  const adjustedLoan = loanAmount - offset - lumpSum;
-  const adjustedPayment = regularRepayment + extraRepayment;
+    // Attach listeners
+    [
+        propertyValueInput, loanValueInput, loanTypeInput, loanTermInput,
+        interestRateInput, repaymentTypeInput, extraRepaymentsInput,
+        offsetAccountInput, lumpSumInput, repaymentFrequencyInput
+    ].forEach(input => {
+        input.addEventListener("input", updateResults);
+    });
 
-  // Calculate interest over full term
-  const totalPayments = monthlyPayment * loanTerm * 12;
-  const totalInterest = totalPayments - loanAmount;
-
-  // Update HTML
-  document.getElementById("regularRepayment").textContent = adjustedPayment.toFixed(2);
-  document.getElementById("repaymentPeriod").textContent = frequency;
-  document.getElementById("totalInterest").textContent = totalInterest.toFixed(2);
-  document.getElementById("timeSaved").textContent = "Coming soon"; // we’ll add time saved calc later
-  document.getElementById("interestSaved").textContent = "Coming soon"; // we’ll add this too
-}
-
-// Hook up sliders and inputs
-document.addEventListener("DOMContentLoaded", () => {
-  const inputs = document.querySelectorAll("input, select");
-  inputs.forEach(input => {
-    input.addEventListener("input", updateResults);
-  });
-
-  // Run once at start
-  updateResults();
+    // Run once on load
+    updateResults();
 });
