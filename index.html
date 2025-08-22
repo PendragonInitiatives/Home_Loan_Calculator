@@ -1,90 +1,101 @@
-<script>
-// ------------------------------
-// Loan Calculator with Frequency & Sliders
-// ------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Project Change Loan Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-// Utility: convert % to decimal
-function rateToDecimal(annualRate) {
-  return (annualRate / 100) / 12; // monthly rate
-}
+  <header>
+    <h1>🏡 PM Project Change Loan Calculator</h1>
+    <p>Explore how repayments, offsets, lump sums, and frequency tweaks can save you time and money.</p>
+  </header>
 
-// Calculate base monthly repayment
-function calculateMonthlyRepayment(loanAmount, annualRate, years) {
-  const n = years * 12; // total months
-  const r = rateToDecimal(annualRate);
+  <main>
+    <!-- Section 1: Loan Inputs -->
+    <section id="loan-inputs">
+      <h2>Loan Details</h2>
+      <label>Property Value: <input type="number" id="propertyValue" value="800000"></label><br>
+      <label>Loan Value: <input type="number" id="loanValue" value="600000"></label><br>
+      <label>Loan Type:
+        <select id="loanType">
+          <option>Variable Owner</option>
+          <option>Fixed Owner</option>
+          <option>Variable IP</option>
+          <option>Fixed IP</option>
+        </select>
+      </label><br>
+      <label>Loan Term (years): <input type="number" id="loanTerm" value="30" min="15" max="30"></label><br>
+      <label>Interest Rate (%): <input type="number" id="interestRate" value="6" step="0.1" min="2" max="10"></label><br>
+      <label>Repayment Type:
+        <select id="repaymentType">
+          <option>P&amp;I</option>
+          <option>Interest Only</option>
+        </select>
+      </label>
+    </section>
 
-  if (r === 0) return loanAmount / n; // no interest edge case
+    <!-- Section 2: Money Saving Levers -->
+    <section id="money-levers">
+      <h2>Levers to Save Money</h2>
 
-  return loanAmount * r / (1 - Math.pow(1 + r, -n));
-}
+      <label>Extra Repayments: $<span id="extraRepayDisplay">0</span>
+        <input type="range" id="extraRepay" min="0" max="2000" step="10" value="0">
+      </label><br>
+      <label>Offset Account: $<span id="offsetDisplay">0</span>
+        <input type="range" id="offset" min="0" max="500000" step="10000" value="0">
+      </label><br>
+      <label>Lump Sum Payment: $<span id="lumpSumDisplay">0</span>
+        <input type="range" id="lumpSum" min="0" max="600000" step="1000" value="0">
+      </label><br>
 
-function updateResults() {
-  const loanAmount = parseFloat(document.getElementById('loanValue').value) || 0;
-  const loanTerm   = parseFloat(document.getElementById('loanTerm').value) || 30;
-  const interest   = parseFloat(document.getElementById('interestRate').value) || 6;
+      <label>Repayment Frequency:
+        <select id="repaymentFrequency">
+          <option value="monthly">Monthly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </label>
+    </section>
 
-  // Slider values
-  const extraRepay = parseFloat(document.getElementById('extraRepay').value) || 0;
-  const offset     = parseFloat(document.getElementById('offset').value) || 0;
-  const lumpSum    = parseFloat(document.getElementById('lumpSum').value) || 0;
+    <!-- Section 3: Results -->
+    <section id="results">
+      <h2>Your Results</h2>
+      <p><strong>Regular Repayment:</strong> $<span id="regularRepayment">0</span> per <span id="repaymentPeriod">month</span></p>
+      <p><strong>Total Interest:</strong> $<span id="totalInterest">0</span></p>
+      <p><strong>Time Saved:</strong> <span id="timeSaved">0</span> years</p>
+      <p><strong>Interest Saved:</strong> $<span id="interestSaved">0</span></p>
+    </section>
 
-  // Repayment frequency
-  const frequency = document.getElementById('repaymentFrequency').value;
+    <!-- Section 4: Charts & Tables -->
+    <section id="charts">
+      <h2>Repayment Chart</h2>
+      <canvas id="repaymentChart" width="400" height="200"></canvas>
+    </section>
 
-  // Adjust loan amount for lump sum + offset
-  const adjustedLoan = Math.max(loanAmount - lumpSum - offset, 0);
+    <section id="amortisation">
+      <h2>Amortisation Schedule</h2>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Opening Balance</th>
+            <th>Repayment</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Closing Balance</th>
+          </tr>
+        </thead>
+        <tbody id="amortisationTable">
+          <!-- Rows will be inserted here with JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
 
-  // Base monthly repayment
-  let monthly = calculateMonthlyRepayment(adjustedLoan, interest, loanTerm);
-
-  // Add extra repayment (per chosen frequency)
-  let repayment = monthly;
-  let periodLabel = "month";
-
-  if (frequency === "fortnightly") {
-    repayment = (monthly * 12 / 26);
-    periodLabel = "fortnight";
-    repayment += extraRepay;
-  } else if (frequency === "weekly") {
-    repayment = (monthly * 12 / 52);
-    periodLabel = "week";
-    repayment += extraRepay;
-  } else {
-    repayment = monthly + extraRepay;
-  }
-
-  // Total interest estimate (simplified)
-  const periods = frequency === "monthly" ? 12 : (frequency === "fortnightly" ? 26 : 52);
-  const total = repayment * loanTerm * periods;
-  const totalInterest = total - adjustedLoan;
-
-  // Compare against base loan
-  const baseTotal = monthly * loanTerm * 12;
-  const baseInterest = baseTotal - loanAmount;
-  const interestSaved = baseInterest - totalInterest;
-
-  // Update results section
-  document.getElementById('regularRepayment').textContent = repayment.toFixed(2);
-  document.getElementById('repaymentPeriod').textContent = periodLabel;
-  document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
-  document.getElementById('timeSaved').textContent = (interestSaved > 0 ? (interestSaved / baseInterest * loanTerm).toFixed(1) : 0);
-  document.getElementById('interestSaved').textContent = interestSaved.toFixed(2);
-
-  // Update slider display spans
-  document.getElementById('extraRepayDisplay').textContent = extraRepay.toLocaleString();
-  document.getElementById('offsetDisplay').textContent = offset.toLocaleString();
-  document.getElementById('lumpSumDisplay').textContent = lumpSum.toLocaleString();
-}
-
-// Auto-update when page loads
-document.addEventListener('DOMContentLoaded', () => {
-  // Hook up inputs + sliders + dropdowns
-  ['extraRepay','offset','lumpSum','loanValue','loanTerm','interestRate','repaymentFrequency']
-    .forEach(id => {
-      document.getElementById(id).addEventListener('input', updateResults);
-      document.getElementById(id).addEventListener('change', updateResults);
-    });
-
-  updateResults();
-});
-</script>
+  <!-- Only load ONE script file -->
+  <script src="script.js"></script>
+</body>
+</html>
