@@ -1,548 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PM Project Change - Home Loan Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#181c40',
-                        accent: '#d8bd7d',
-                        secondary: '#b9c7d9',
-                        highlight: '#faf2aa',
-                        blue: '#5290c9'
-                    },
-                    fontFamily: {
-                        'roboto': ['Roboto', 'sans-serif'],
-                        'opensans': ['Open Sans', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Open Sans', sans-serif; }
-        .roboto { font-family: 'Roboto', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #181c40 0%, #2a2f5a 100%); }
-        .glass-effect { backdrop-filter: blur(10px); background: rgba(216, 189, 125, 0.1); }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        
-        /* Custom slider styles */
-        .slider {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 8px;
-            border-radius: 5px;
-            background: rgba(216, 189, 125, 0.3);
-            outline: none;
-        }
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #d8bd7d;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        }
-        .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #d8bd7d;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        }
-    </style>
-</head>
-<body class="min-h-screen gradient-bg text-white">
-    <!-- Floating Background Elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-20 left-10 w-32 h-32 bg-accent/10 rounded-full animate-float"></div>
-        <div class="absolute top-40 right-20 w-24 h-24 bg-blue/20 rounded-full animate-float" style="animation-delay: -2s;"></div>
-        <div class="absolute bottom-32 left-1/4 w-40 h-40 bg-secondary/10 rounded-full animate-float" style="animation-delay: -4s;"></div>
-    </div>
+}
 
-    <div class="relative z-10 container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-4xl md:text-6xl font-bold roboto text-white mb-4">
-                🏠 PM Project Change
-            </h1>
-            <p class="text-xl text-secondary mb-2 opensans">Home Loan Repayments Calculator</p>
-            <div class="w-24 h-1 bg-accent mx-auto rounded-full"></div>
-        </div>
-
-        <!-- Section 1: Basic Loan Details -->
-        <div class="max-w-6xl mx-auto mb-12">
-            <div class="glass-effect rounded-3xl p-8 md:p-12 border border-accent/20 shadow-2xl">
-                <h2 class="text-3xl font-bold roboto text-white mb-8 flex items-center">
-                    <span class="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-4 text-primary text-lg font-bold">1</span>
-                    Basic Loan Details
-                </h2>
-
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Property Value -->
-                    <div class="space-y-3">
-                        <label class="block text-secondary text-sm font-semibold">Property Value</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-accent font-bold">$</span>
-                            <input type="text" id="propertyValue" value="800,000" 
-                                   class="w-full bg-primary/50 border border-accent/30 rounded-xl px-10 py-3 text-white focus:border-accent focus:outline-none"
-                                   oninput="formatCurrency(this); calculateAll()">
-                        </div>
-                    </div>
-
-                    <!-- Loan Value -->
-                    <div class="space-y-3">
-                        <label class="block text-secondary text-sm font-semibold">Loan Amount</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-accent font-bold">$</span>
-                            <input type="text" id="loanAmount" value="640,000" 
-                                   class="w-full bg-primary/50 border border-accent/30 rounded-xl px-10 py-3 text-white focus:border-accent focus:outline-none"
-                                   oninput="formatCurrency(this); calculateAll()">
-                        </div>
-                    </div>
-
-                    <!-- Loan Type -->
-                    <div class="space-y-3">
-                        <label class="block text-secondary text-sm font-semibold">Loan Type</label>
-                        <select id="loanType" class="w-full bg-primary/50 border border-accent/30 rounded-xl px-4 py-3 text-white focus:border-accent focus:outline-none" onchange="calculateAll()">
-                            <option value="variable-owner">Variable Owner Occupier</option>
-                            <option value="fixed-owner">Fixed Owner Occupier</option>
-                            <option value="variable-ip">Variable Investment Property</option>
-                            <option value="fixed-ip">Fixed Investment Property</option>
-                        </select>
-                    </div>
-
-                    <!-- Loan Term -->
-                    <div class="space-y-3">
-                        <label class="block text-secondary text-sm font-semibold">Loan Term</label>
-                        <select id="loanTerm" class="w-full bg-primary/50 border border-accent/30 rounded-xl px-4 py-3 text-white focus:border-accent focus:outline-none" onchange="calculateAll()">
-                            <option value="15">15 years</option>
-                            <option value="20">20 years</option>
-                            <option value="25">25 years</option>
-                            <option value="30" selected>30 years</option>
-                        </select>
-                    </div>
-
-                    <!-- Interest Rate -->
-                    <div class="space-y-3">
-                        <label class="block text-secondary text-sm font-semibold">Interest Rate (%)</label>
-                        <input type="number" id="interestRate" value="6.5" step="0.01" min="2" max="10"
-                               class="w-full bg-primary/50 border border-accent/30 rounded-xl px-4 py-3 text-white focus:border-accent focus:outline-none"
-                               oninput="calculateAll()">
-                    </div>
-
-                    <!-- Repayment Type -->
-                    <div class="space-y-3">
-                        <label class="block text-secondary text-sm font-semibold">Repayment Type</label>
-                        <select id="repaymentType" class="w-full bg-primary/50 border border-accent/30 rounded-xl px-4 py-3 text-white focus:border-accent focus:outline-none" onchange="calculateAll()">
-                            <option value="pi">Principal & Interest</option>
-                            <option value="io">Interest Only</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section 2: Money Saving Levers -->
-        <div class="max-w-6xl mx-auto mb-12">
-            <div class="glass-effect rounded-3xl p-8 md:p-12 border border-accent/20 shadow-2xl">
-                <h2 class="text-3xl font-bold roboto text-white mb-8 flex items-center">
-                    <span class="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-4 text-primary text-lg font-bold">2</span>
-                    Money Saving Levers
-                </h2>
-
-                <div class="grid md:grid-cols-2 gap-8">
-                    <!-- Extra Repayments -->
-                    <div class="bg-primary/30 rounded-2xl p-6 border border-accent/20">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold roboto text-white">💰 Extra Repayments</h3>
-                            <div class="flex space-x-2">
-                                <button onclick="showInfo('extraInfo')" 
-                                        class="w-6 h-6 bg-blue rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-blue/80 transition-all">
-                                    i
-                                </button>
-                                <button onclick="showWarning('extraWarning')" 
-                                        class="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-yellow-400 transition-all">
-                                    ⚠
-                                </button>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-secondary text-sm mb-2">Extra Amount: $<span id="extraAmount">100</span></label>
-                                <input type="range" id="extraSlider" min="0" max="2000" step="10" value="100" 
-                                       class="slider w-full" oninput="updateExtra(this.value)">
-                            </div>
-                            <div>
-                                <label class="block text-secondary text-sm mb-2">Frequency</label>
-                                <select id="extraFrequency" class="w-full bg-primary/50 border border-accent/30 rounded-xl px-4 py-3 text-white focus:border-accent focus:outline-none" onchange="calculateAll()">
-                                    <option value="weekly">Weekly</option>
-                                    <option value="fortnightly">Fortnightly</option>
-                                    <option value="monthly" selected>Monthly</option>
-                                </select>
-                            </div>
-                            <div id="extraSavings" class="text-highlight text-sm"></div>
-                        </div>
-                    </div>
-
-                    <!-- Offset Account -->
-                    <div class="bg-primary/30 rounded-2xl p-6 border border-accent/20">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold roboto text-white">🏦 Offset Account</h3>
-                            <button onclick="showInfo('offsetInfo')" 
-                                    class="w-6 h-6 bg-blue rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-blue/80 transition-all">
-                                i
-                            </button>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-secondary text-sm mb-2">Offset Amount: $<span id="offsetAmount">0</span></label>
-                                <input type="range" id="offsetSlider" min="0" max="500000" step="10000" value="0" 
-                                       class="slider w-full" oninput="updateOffset(this.value)">
-                            </div>
-                            <div id="offsetSavings" class="text-highlight text-sm"></div>
-                        </div>
-                    </div>
-
-                    <!-- Lump Sum -->
-                    <div class="bg-primary/30 rounded-2xl p-6 border border-accent/20">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold roboto text-white">💵 Lump Sum Payment</h3>
-                            <div class="flex space-x-2">
-                                <button onclick="showInfo('lumpSumInfo')" 
-                                        class="w-6 h-6 bg-blue rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-blue/80 transition-all">
-                                    i
-                                </button>
-                                <button onclick="showWarning('lumpSumWarning')" 
-                                        class="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-yellow-400 transition-all">
-                                    ⚠
-                                </button>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-secondary text-sm mb-2">Lump Sum: $<span id="lumpSumAmount">0</span></label>
-                                <input type="range" id="lumpSumSlider" min="0" max="640000" step="1000" value="0" 
-                                       class="slider w-full" oninput="updateLumpSum(this.value)">
-                            </div>
-                            <div id="lumpSumSavings" class="text-highlight text-sm"></div>
-                        </div>
-                    </div>
-
-                    <!-- Repayment Frequency -->
-                    <div class="bg-primary/30 rounded-2xl p-6 border border-accent/20">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-semibold roboto text-white">📅 Repayment Frequency</h3>
-                            <button onclick="showInfo('frequencyInfo')" 
-                                    class="w-6 h-6 bg-blue rounded-full flex items-center justify-center text-white text-xs font-bold hover:bg-blue/80 transition-all">
-                                i
-                            </button>
-                        </div>
-                        <div class="space-y-4">
-                            <select id="repaymentFrequency" class="w-full bg-primary/50 border border-accent/30 rounded-xl px-4 py-3 text-white focus:border-accent focus:outline-none" onchange="calculateAll()">
-                                <option value="monthly">Monthly</option>
-                                <option value="fortnightly">Fortnightly</option>
-                                <option value="weekly">Weekly</option>
-                            </select>
-                            <div id="frequencySavings" class="text-highlight text-sm"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section 3: Results -->
-        <div class="max-w-6xl mx-auto">
-            <div class="glass-effect rounded-3xl p-8 md:p-12 border border-accent/20 shadow-2xl">
-                <h2 class="text-3xl font-bold roboto text-white mb-8 flex items-center">
-                    <span class="w-10 h-10 bg-accent rounded-full flex items-center justify-center mr-4 text-primary text-lg font-bold">3</span>
-                    Your Results
-                </h2>
-
-                <!-- Loan Summary -->
-                <div class="grid md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-accent/20 rounded-2xl p-6 text-center">
-                        <h3 class="text-lg font-semibold roboto text-accent mb-2">Regular Repayment</h3>
-                        <p class="text-2xl font-bold text-white">$<span id="regularRepayment">0</span></p>
-                        <p class="text-sm text-secondary">per <span id="repaymentPeriod">month</span></p>
-                    </div>
-                    <div class="bg-blue/20 rounded-2xl p-6 text-center">
-                        <h3 class="text-lg font-semibold roboto text-blue mb-2">Total Interest</h3>
-                        <p class="text-2xl font-bold text-white">$<span id="totalInterest">0</span></p>
-                        <p class="text-sm text-secondary">over loan term</p>
-                    </div>
-                    <div class="bg-highlight/20 rounded-2xl p-6 text-center">
-                        <h3 class="text-lg font-semibold roboto text-highlight mb-2">Time Saved</h3>
-                        <p class="text-2xl font-bold text-white"><span id="timeSaved">0</span> years</p>
-                        <p class="text-sm text-secondary">with optimizations</p>
-                    </div>
-                </div>
-
-                <!-- Comparison Table -->
-                <div class="bg-primary/30 rounded-2xl p-6 mb-8">
-                    <h3 class="text-xl font-semibold roboto text-white mb-4">📊 Comparison Summary</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-accent/30">
-                                    <th class="text-left py-3 text-secondary">Scenario</th>
-                                    <th class="text-right py-3 text-secondary">Repayment</th>
-                                    <th class="text-right py-3 text-secondary">Total Interest</th>
-                                    <th class="text-right py-3 text-secondary">Loan Term</th>
-                                    <th class="text-right py-3 text-secondary">Interest Saved</th>
-                                </tr>
-                            </thead>
-                            <tbody id="comparisonTable">
-                                <!-- Populated by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Chart -->
-                <div class="bg-primary/30 rounded-2xl p-6">
-                    <h3 class="text-xl font-semibold roboto text-white mb-4">📈 Repayment Breakdown</h3>
-                    <canvas id="repaymentChart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Info Modal -->
-    <div id="infoModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-            <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <span class="w-8 h-8 bg-blue rounded-full flex items-center justify-center mr-3 text-white text-sm">i</span>
-                Information
-            </h3>
-            <div id="infoContent" class="text-gray-600 mb-6 leading-relaxed"></div>
-            <button onclick="closeInfoModal()" 
-                    class="w-full bg-primary hover:bg-primary/80 text-white font-semibold py-3 px-6 rounded-xl transition-all">
-                Got it!
-            </button>
-        </div>
-    </div>
-
-    <!-- Warning Modal -->
-    <div id="warningModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-            <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <span class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mr-3 text-white text-sm">⚠</span>
-                Important Warning
-            </h3>
-            <div id="warningContent" class="text-gray-600 mb-6 leading-relaxed"></div>
-            <button onclick="closeWarningModal()" 
-                    class="w-full bg-yellow-500 hover:bg-yellow-400 text-white font-semibold py-3 px-6 rounded-xl transition-all">
-                Understood
-            </button>
-        </div>
-    </div>
-
-    <script>
-        let chart = null;
-
-        function formatCurrency(input) {
-            let value = input.value.replace(/[^\d]/g, '');
-            if (value) {
-                input.value = parseInt(value).toLocaleString();
-            }
-        }
-
-        function parseCurrency(value) {
-            return parseInt(value.replace(/[^\d]/g, '')) || 0;
-        }
-
-        function updateExtra(value) {
-            document.getElementById('extraAmount').textContent = value;
-            calculateAll();
-        }
-
-        function updateOffset(value) {
-            document.getElementById('offsetAmount').textContent = parseInt(value).toLocaleString();
-            calculateAll();
-        }
-
-        function updateLumpSum(value) {
-            document.getElementById('lumpSumAmount').textContent = parseInt(value).toLocaleString();
-            calculateAll();
-        }
-
-        function showInfo(type) {
-            const infoTexts = {
-                extraInfo: "Making extra repayments means paying more than the minimum required, which directly reduces the principal (loan balance) so less interest is charged.<br><br>Even small amounts (like $10 a week) create a snowball effect because every dollar saved on interest allows future repayments to chip away at the principal faster, shortening the loan term significantly.",
-                offsetInfo: "An offset account is a savings/transaction account linked to your loan, where the balance is subtracted from your loan when calculating interest, so you only pay interest on the difference.<br><br>This means more of your repayment goes to paying down the principal (the loan itself), which reduces the loan term.",
-                lumpSumInfo: "A lump sum repayment is a one-off payment made on top of your regular repayments, which goes straight to reducing the principal (loan balance) and immediately lowers the interest charged.<br><br>This creates a snowball effect, as the reduced interest means future repayments knock off the principal faster, cutting years off the loan term.",
-                frequencyInfo: "Paying your loan fortnightly or weekly instead of monthly is a simple timing tweak since there are 26 fortnights or 52 weeks in a year, you end up making the equivalent of 13 monthly payments instead of 12.<br><br>This extra payment quietly chips away at the principal, which reduces interest and can save you tens of thousands over the life of the loan, while also shortening the loan term."
-            };
+function updateFrequencySavings(frequency, monthlyPayment, loanAmount, interestRate, loanTerm) {
+            const savingsDiv = document.getElementById('frequencySavings');
             
-            document.getElementById('infoContent').innerHTML = infoTexts[type];
-            document.getElementById('infoModal').classList.remove('hidden');
-            document.getElementById('infoModal').classList.add('flex');
-        }
-
-        function showWarning(type) {
-            const warningText = "Be careful with a redraw facility. The bank can change the rules, freeze or absorb redraw funds, and if you later turn the home into an investment property, money taken out of redraw can reduce your tax benefits.<br><br>An offset account keeps your cash separate and under your control, even though it takes an extra mental calculation — it's usually the safer long-term option.";
-            
-            document.getElementById('warningContent').innerHTML = warningText;
-            document.getElementById('warningModal').classList.remove('hidden');
-            document.getElementById('warningModal').classList.add('flex');
-        }
-
-        function closeInfoModal() {
-            document.getElementById('infoModal').classList.add('hidden');
-            document.getElementById('infoModal').classList.remove('flex');
-        }
-
-        function closeWarningModal() {
-            document.getElementById('warningModal').classList.add('hidden');
-            document.getElementById('warningModal').classList.remove('flex');
-        }
-
-        function calculateMonthlyPayment(principal, rate, term) {
-            const monthlyRate = rate / 100 / 12;
-            const numPayments = term * 12;
-            
-            if (rate === 0) return principal / numPayments;
-            
-            return principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-                   (Math.pow(1 + monthlyRate, numPayments) - 1);
-        }
-
-        function calculateAll() {
-            const loanAmount = parseCurrency(document.getElementById('loanAmount').value);
-            const interestRate = parseFloat(document.getElementById('interestRate').value);
-            const loanTerm = parseInt(document.getElementById('loanTerm').value);
-            const repaymentType = document.getElementById('repaymentType').value;
-            const repaymentFreq = document.getElementById('repaymentFrequency').value;
-            const extraAmount = parseInt(document.getElementById('extraAmount').textContent);
-            const offsetAmount = parseCurrency(document.getElementById('offsetAmount').textContent);
-            const lumpSum = parseCurrency(document.getElementById('lumpSumAmount').textContent);
-
-            // Update lump sum slider max
-            document.getElementById('lumpSumSlider').max = loanAmount;
-
-            // Calculate base monthly payment
-            let monthlyPayment;
-            if (repaymentType === 'io') {
-                monthlyPayment = (loanAmount * interestRate / 100) / 12;
-            } else {
-                monthlyPayment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
+            if (frequency === 'monthly') {
+                savingsDiv.innerHTML = 'You are making standard monthly repayments.';
+                return;
             }
-
-            // Adjust for frequency using proper annual calculations
-            let payment, paymentsPerYear;
-            switch (repaymentFreq) {
-                case 'weekly':
-                    payment = (monthlyPayment * 12) / 52;
-                    paymentsPerYear = 52;
-                    document.getElementById('repaymentPeriod').textContent = 'week';
-                    break;
-                case 'fortnightly':
-                    payment = (monthlyPayment * 12) / 26;
-                    paymentsPerYear = 26;
-                    document.getElementById('repaymentPeriod').textContent = 'fortnight';
-                    break;
-                default:
-                    payment = monthlyPayment;
-                    paymentsPerYear = 12;
-                    document.getElementById('repaymentPeriod').textContent = 'month';
-            }
-
-            // Calculate with optimizations
-            const effectiveLoan = Math.max(0, loanAmount - offsetAmount - lumpSum);
-            let optimizedPayment = payment;
-            
-            if (extraAmount > 0) {
-                const extraFreq = document.getElementById('extraFrequency').value;
-                let extraPerPayment = 0;
-                
-                switch (extraFreq) {
-                    case 'weekly':
-                        extraPerPayment = extraAmount * 52 / paymentsPerYear;
-                        break;
-                    case 'fortnightly':
-                        extraPerPayment = extraAmount * 26 / paymentsPerYear;
-                        break;
-                    case 'monthly':
-                        extraPerPayment = extraAmount * 12 / paymentsPerYear;
-                        break;
-                }
-                optimizedPayment += extraPerPayment;
-            }
-
-            // Calculate loan term and interest with optimizations
-            let remainingBalance = effectiveLoan;
-            let totalInterest = 0;
-            let payments = 0;
-            const periodRate = interestRate / 100 / paymentsPerYear;
-
-            while (remainingBalance > 0.01 && payments < loanTerm * paymentsPerYear) {
-                const interestPayment = remainingBalance * periodRate;
-                const principalPayment = Math.min(optimizedPayment - interestPayment, remainingBalance);
-                
-                totalInterest += interestPayment;
-                remainingBalance -= principalPayment;
-                payments++;
-            }
-
-            const actualTerm = payments / paymentsPerYear;
-            const timeSaved = Math.max(0, loanTerm - actualTerm);
-
-            // Calculate base scenario for comparison
-            const baseInterest = (monthlyPayment * loanTerm * 12) - loanAmount;
-            const interestSaved = Math.max(0, baseInterest - totalInterest);
-
-            // Update display
-            document.getElementById('regularRepayment').textContent = Math.round(payment).toLocaleString();
-            document.getElementById('totalInterest').textContent = Math.round(totalInterest).toLocaleString();
-            document.getElementById('timeSaved').textContent = timeSaved.toFixed(1);
-
-            // Update comparison table
-            updateComparisonTable(payment, totalInterest, actualTerm, interestSaved, monthlyPayment, baseInterest, loanTerm);
-
-            // Update frequency savings
-            updateFrequencySavings(repaymentFreq, monthlyPayment, loanAmount, interestRate, loanTerm);
-
-            // Update individual savings
-            updateIndividualSavings(loanAmount, interestRate, loanTerm, monthlyPayment);
-
-            // Update chart
-            updateChart(loanAmount, totalInterest);
-        }
-
-        function updateComparisonTable(payment, totalInterest, actualTerm, interestSaved, basePayment, baseInterest, baseTerm) {
-            const table = document.getElementById('comparisonTable');
-            table.innerHTML = `
-                <tr class="border-b border-accent/20">
-                    <td class="py-3 text-white">Standard Loan</td>
-                    <td class="py-3 text-right text-white">$${Math.round(basePayment).toLocaleString()}</td>
-                    <td class="py-3 text-right text-white">$${Math.round(baseInterest).toLocaleString()}</td>
-                    <td class="py-3 text-right text-white">${baseTerm} years</td>
-                    <td class="py-3 text-right text-secondary">-</td>
-                </tr>
-                <tr>
-                    <td class="py-3 text-accent font-semibold">With Optimizations</td>
-                    <td class="py-3 text-right text-accent font-semibold">$${Math.round(payment).toLocaleString()}</td>
-                    <td class="py-3 text-right text-accent font-semibold">$${Math.round(totalInterest).toLocaleString()}</td>
-                    <td class="py-3 text-right text-accent font-semibold">${actualTerm.toFixed(1)} years</td>
-                    <td class="py-3 text-right text-highlight font-semibold">$${Math.round(interestSaved).toLocaleString()}</td>
-                </tr>
-            `;
-        }
-
-       function updateFrequencySavings(frequency, monthlyPayment, loanAmount, interestRate, loanTerm) {
     const savingsDiv = document.getElementById('frequencySavings');
 
     if (frequency === 'monthly') {
@@ -550,149 +14,71 @@
         return;
     }
 
-    // --- Setup repayments per year ---
+    // Calculate repayment amounts using proper annual calculations
     let payment, paymentsPerYear;
     if (frequency === 'fortnightly') {
-        payment = (monthlyPayment * 12) / 26;
+        payment = (monthlyPayment * 12) / 26; // ✅ proper fortnightly
         paymentsPerYear = 26;
     } else if (frequency === 'weekly') {
-        payment = (monthlyPayment * 12) / 52;
+        payment = (monthlyPayment * 12) / 52; // ✅ proper weekly
         paymentsPerYear = 52;
     }
 
-    // --- Annual repayments for chosen frequency ---
+    // Calculate annual repayments
     const annualRepayments = payment * paymentsPerYear;
     const monthlyAnnualRepayments = monthlyPayment * 12;
     const extraPerYear = annualRepayments - monthlyAnnualRepayments;
 
-    // --- Estimate loan reduction ---
-    const totalExtra = extraPerYear * loanTerm;   // total extra paid over life of loan
-    const monthsSaved = totalExtra / monthlyPayment; 
+    // Estimate time saved using the extra repayments
+    const monthsSaved = (extraPerYear * loanTerm) / monthlyPayment;
     const yearsSaved = (monthsSaved / 12).toFixed(1);
 
-    // --- Estimate interest saved ---
-    const monthlyRate = (interestRate / 100) / 12;
-    const totalMonths = loanTerm * 12;
-
-    // Baseline interest (monthly)
-    const totalRepaymentsMonthly = monthlyPayment * totalMonths;
-    const totalInterestMonthly = totalRepaymentsMonthly - loanAmount;
-
-    // New interest (approx): subtract extra repayments
-    const totalRepaymentsNew = (annualRepayments * loanTerm);
-    const totalInterestNew = totalRepaymentsNew - loanAmount;
-    const interestSaved = Math.max(0, totalInterestMonthly - totalInterestNew);
-
-    // --- Show result ---
-    savingsDiv.innerHTML = `
-        By paying ${frequency}, you effectively make 13 months of payments per year. 
-        This shortens your loan by about ${yearsSaved} years 
-        and saves you around $${interestSaved.toLocaleString()} in interest.
-    `;
+    savingsDiv.innerHTML = `By paying ${frequency}, you effectively make 13 months of payments per year. 
+        This shortens your loan by about ${yearsSaved} years and saves you significant interest.`;
 }
 
+            // Calculate repayment amounts using proper annual calculations
+            let payment, paymentsPerYear;
+            if (frequency === 'weekly') {
+                payment = (monthlyPayment * 12) / 52;
+                paymentsPerYear = 52;
+            } else {
+                payment = (monthlyPayment * 12) / 26;
+                paymentsPerYear = 26;
+            }
+
+            // Calculate annual repayments
+            const annualRepayments = payment * paymentsPerYear;
+            const monthlyAnnualRepayments = monthlyPayment * 12;
+            const extraPerYear = annualRepayments - monthlyAnnualRepayments;
+
+            // Estimate years saved using the extra payments
+            const monthsSaved = (extraPerYear * loanTerm) / monthlyPayment;
+            const yearsSaved = (monthsSaved / 12).toFixed(1);
+
+            savingsDiv.innerHTML = `By paying ${frequency}, you effectively make 13 months of payments per year. This shortens your loan by about ${yearsSaved} years and saves you significant interest.`;
+        }
+
+function updateIndividualSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment) {
+const baseInterest = (baseMonthlyPayment * loanTerm * 12) - loanAmount;
+
+// Calculate extra repayments savings
+const extraAmount = parseInt(document.getElementById('extraAmount').textContent);
+if (extraAmount > 0) {
+const extraFreq = document.getElementById('extraFrequency').value;
+let extraPerMonth = 0;
+switch (extraFreq) {
+case 'weekly': extraPerMonth = extraAmount * 52 / 12; break;
+case 'fortnightly': extraPerMonth = extraAmount * 26 / 12; break;
+case 'monthly': extraPerMonth = extraAmount; break;
 }
 
+const extraSavings = calculateSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment + extraPerMonth);
+document.getElementById('extraSavings').innerHTML = `💡 Save $${Math.round(extraSavings.interestSaved).toLocaleString()} and ${extraSavings.timeSaved.toFixed(1)} years`;
+} else {
+document.getElementById('extraSavings').innerHTML = '';
+}
 
-        function updateIndividualSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment) {
-            const baseInterest = (baseMonthlyPayment * loanTerm * 12) - loanAmount;
-            
-            // Calculate extra repayments savings
-            const extraAmount = parseInt(document.getElementById('extraAmount').textContent);
-            if (extraAmount > 0) {
-                const extraFreq = document.getElementById('extraFrequency').value;
-                let extraPerMonth = 0;
-                switch (extraFreq) {
-                    case 'weekly': extraPerMonth = extraAmount * 52 / 12; break;
-                    case 'fortnightly': extraPerMonth = extraAmount * 26 / 12; break;
-                    case 'monthly': extraPerMonth = extraAmount; break;
-                }
-                
-                const extraSavings = calculateSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment + extraPerMonth);
-                document.getElementById('extraSavings').innerHTML = `💡 Save $${Math.round(extraSavings.interestSaved).toLocaleString()} and ${extraSavings.timeSaved.toFixed(1)} years`;
-            } else {
-                document.getElementById('extraSavings').innerHTML = '';
-            }
-            
-            // Calculate offset savings
-            const offsetAmount = parseCurrency(document.getElementById('offsetAmount').textContent);
-            if (offsetAmount > 0) {
-                const offsetSavings = calculateSavings(Math.max(0, loanAmount - offsetAmount), interestRate, loanTerm, baseMonthlyPayment);
-                document.getElementById('offsetSavings').innerHTML = `💡 Save $${Math.round(offsetSavings.interestSaved).toLocaleString()} and ${offsetSavings.timeSaved.toFixed(1)} years`;
-            } else {
-                document.getElementById('offsetSavings').innerHTML = '';
-            }
-            
-            // Calculate lump sum savings
-            const lumpSum = parseCurrency(document.getElementById('lumpSumAmount').textContent);
-            if (lumpSum > 0) {
-                const lumpSumSavings = calculateSavings(Math.max(0, loanAmount - lumpSum), interestRate, loanTerm, baseMonthlyPayment);
-                document.getElementById('lumpSumSavings').innerHTML = `💡 Save $${Math.round(lumpSumSavings.interestSaved).toLocaleString()} and ${lumpSumSavings.timeSaved.toFixed(1)} years`;
-            } else {
-                document.getElementById('lumpSumSavings').innerHTML = '';
-            }
-        }
-        
-        function calculateSavings(principal, rate, term, monthlyPayment) {
-            let remainingBalance = principal;
-            let totalInterest = 0;
-            let payments = 0;
-            const monthlyRate = rate / 100 / 12;
-            
-            while (remainingBalance > 0.01 && payments < term * 12) {
-                const interestPayment = remainingBalance * monthlyRate;
-                const principalPayment = Math.min(monthlyPayment - interestPayment, remainingBalance);
-                
-                totalInterest += interestPayment;
-                remainingBalance -= principalPayment;
-                payments++;
-            }
-            
-            const actualTerm = payments / 12;
-            const baseInterest = (monthlyPayment * term * 12) - principal;
-            
-            return {
-                interestSaved: Math.max(0, baseInterest - totalInterest),
-                timeSaved: Math.max(0, term - actualTerm)
-            };
-        }
-
-        function updateChart(principal, interest) {
-            const ctx = document.getElementById('repaymentChart').getContext('2d');
-            
-            if (chart) {
-                chart.destroy();
-            }
-
-            chart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Principal', 'Interest'],
-                    datasets: [{
-                        data: [principal, interest],
-                        backgroundColor: ['#d8bd7d', '#5290c9'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff',
-                                font: {
-                                    family: 'Open Sans'
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Initialize calculator
-        calculateAll();
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'973190e7504ff3c0',t:'MTc1NTg1NzI3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+// Calculate offset savings
+const offsetAmount = parseCurrency(document.getElementById('offsetAmount').textContent);
+if (offsetAmount > 0) {
