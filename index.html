@@ -1,84 +1,99 @@
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Project Change Loan Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-function updateFrequencySavings(frequency, monthlyPayment, loanAmount, interestRate, loanTerm) {
-            const savingsDiv = document.getElementById('frequencySavings');
-            
-            if (frequency === 'monthly') {
-                savingsDiv.innerHTML = 'You are making standard monthly repayments.';
-                return;
-            }
-    const savingsDiv = document.getElementById('frequencySavings');
+  <header>
+    <h1>🏡 PM Project Change Loan Calculator</h1>
+    <p>Explore how repayments, offsets, lump sums, and frequency tweaks can save you time and money.</p>
+  </header>
 
-    if (frequency === 'monthly') {
-        savingsDiv.innerHTML = 'You are making standard monthly repayments.';
-        return;
-    }
+  <main>
+    <!-- Section 1: Loan Inputs -->
+    <section id="loan-inputs">
+      <h2>Loan Details</h2>
+      <label>Property Value: <input type="number" id="propertyValue" value="800000"></label><br>
+      <label>Loan Value: <input type="number" id="loanValue" value="600000"></label><br>
+      <label>Loan Type:
+        <select id="loanType">
+          <option>Variable Owner</option>
+          <option>Fixed Owner</option>
+          <option>Variable IP</option>
+          <option>Fixed IP</option>
+        </select>
+      </label><br>
+      <label>Loan Term (years): <input type="number" id="loanTerm" value="30" min="15" max="30"></label><br>
+      <label>Interest Rate (%): <input type="number" id="interestRate" value="6" step="0.1" min="2" max="10"></label><br>
+      <label>Repayment Type:
+        <select id="repaymentType">
+          <option>P&amp;I</option>
+          <option>Interest Only</option>
+        </select>
+      </label>
+    </section>
 
-    // Calculate repayment amounts using proper annual calculations
-    let payment, paymentsPerYear;
-    if (frequency === 'fortnightly') {
-        payment = (monthlyPayment * 12) / 26; // ✅ proper fortnightly
-        paymentsPerYear = 26;
-    } else if (frequency === 'weekly') {
-        payment = (monthlyPayment * 12) / 52; // ✅ proper weekly
-        paymentsPerYear = 52;
-    }
+    <!-- Section 2: Money Saving Levers -->
+    <section id="money-levers">
+      <h2>Levers to Save Money</h2>
 
-    // Calculate annual repayments
-    const annualRepayments = payment * paymentsPerYear;
-    const monthlyAnnualRepayments = monthlyPayment * 12;
-    const extraPerYear = annualRepayments - monthlyAnnualRepayments;
+      <label>Extra Repayments: $<span id="extraRepayDisplay">0</span>
+        <input type="range" id="extraRepay" min="0" max="2000" step="10" value="0">
+      </label><br>
+      <label>Offset Account: $<span id="offsetDisplay">0</span>
+        <input type="range" id="offset" min="0" max="500000" step="10000" value="0">
+      </label><br>
+      <label>Lump Sum Payment: $<span id="lumpSumDisplay">0</span>
+        <input type="range" id="lumpSum" min="0" max="600000" step="1000" value="0">
+      </label><br>
 
-    // Estimate time saved using the extra repayments
-    const monthsSaved = (extraPerYear * loanTerm) / monthlyPayment;
-    const yearsSaved = (monthsSaved / 12).toFixed(1);
+      <label>Repayment Frequency:
+        <select id="repaymentFrequency">
+          <option value="monthly">Monthly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </label>
+    </section>
 
-    savingsDiv.innerHTML = `By paying ${frequency}, you effectively make 13 months of payments per year. 
-        This shortens your loan by about ${yearsSaved} years and saves you significant interest.`;
-}
+    <!-- Section 3: Results -->
+    <section id="results">
+      <h2>Your Results</h2>
+      <p><strong>Regular Repayment:</strong> $<span id="regularRepayment">0</span> per <span id="repaymentPeriod">month</span></p>
+      <p><strong>Total Interest:</strong> $<span id="totalInterest">0</span></p>
+      <p><strong>Time Saved:</strong> <span id="timeSaved">0</span> years</p>
+      <p><strong>Interest Saved:</strong> $<span id="interestSaved">0</span></p>
+    </section>
 
-            // Calculate repayment amounts using proper annual calculations
-            let payment, paymentsPerYear;
-            if (frequency === 'weekly') {
-                payment = (monthlyPayment * 12) / 52;
-                paymentsPerYear = 52;
-            } else {
-                payment = (monthlyPayment * 12) / 26;
-                paymentsPerYear = 26;
-            }
+    <!-- Section 4: Charts & Tables -->
+    <section id="charts">
+      <h2>Repayment Chart</h2>
+      <canvas id="repaymentChart" width="400" height="200"></canvas>
+    </section>
 
-            // Calculate annual repayments
-            const annualRepayments = payment * paymentsPerYear;
-            const monthlyAnnualRepayments = monthlyPayment * 12;
-            const extraPerYear = annualRepayments - monthlyAnnualRepayments;
+    <section id="amortisation">
+      <h2>Amortisation Schedule</h2>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Opening Balance</th>
+            <th>Repayment</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Closing Balance</th>
+          </tr>
+        </thead>
+        <tbody id="amortisationTable">
+          <!-- Rows will be inserted here with JS -->
+        </tbody>
+      </table>
+    </section>
+  </main>
 
-            // Estimate years saved using the extra payments
-            const monthsSaved = (extraPerYear * loanTerm) / monthlyPayment;
-            const yearsSaved = (monthsSaved / 12).toFixed(1);
-
-            savingsDiv.innerHTML = `By paying ${frequency}, you effectively make 13 months of payments per year. This shortens your loan by about ${yearsSaved} years and saves you significant interest.`;
-        }
-
-function updateIndividualSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment) {
-const baseInterest = (baseMonthlyPayment * loanTerm * 12) - loanAmount;
-
-// Calculate extra repayments savings
-const extraAmount = parseInt(document.getElementById('extraAmount').textContent);
-if (extraAmount > 0) {
-const extraFreq = document.getElementById('extraFrequency').value;
-let extraPerMonth = 0;
-switch (extraFreq) {
-case 'weekly': extraPerMonth = extraAmount * 52 / 12; break;
-case 'fortnightly': extraPerMonth = extraAmount * 26 / 12; break;
-case 'monthly': extraPerMonth = extraAmount; break;
-}
-
-const extraSavings = calculateSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment + extraPerMonth);
-document.getElementById('extraSavings').innerHTML = `💡 Save $${Math.round(extraSavings.interestSaved).toLocaleString()} and ${extraSavings.timeSaved.toFixed(1)} years`;
-} else {
-document.getElementById('extraSavings').innerHTML = '';
-}
-
-// Calculate offset savings
-const offsetAmount = parseCurrency(document.getElementById('offsetAmount').textContent);
-if (offsetAmount > 0) {
+</body>
+</html>
