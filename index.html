@@ -1,108 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PM Project Change Loan Calculator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-
-  <header>
-    <h1>🏡 PM Project Change Loan Calculator</h1>
-    <p>Explore how repayments, offsets, lump sums, and frequency tweaks can save you time and money.</p>
-  </header>
-
-  <main>
-    <!-- Section 1: Loan Inputs -->
-    <section id="loan-inputs">
-      <h2>Loan Details</h2>
-      <label>Property Value: <input type="number" id="propertyValue" value="800000"></label><br>
-      <label>Loan Value: <input type="number" id="loanValue" value="600000"></label><br>
-      <label>Loan Type:
-        <select id="loanType">
-          <option>Variable Owner</option>
-          <option>Fixed Owner</option>
-          <option>Variable IP</option>
-          <option>Fixed IP</option>
-        </select>
-      </label><br>
-      <label>Loan Term (years): <input type="number" id="loanTerm" value="30" min="15" max="30"></label><br>
-      <label>Interest Rate (%): <input type="number" id="interestRate" value="6" step="0.1" min="2" max="10"></label><br>
-      <label>Repayment Type:
-        <select id="repaymentType">
-          <option>P&amp;I</option>
-          <option>Interest Only</option>
-        </select>
-      </label>
-    </section>
-
-    <!-- Section 2: Money Saving Levers -->
-    <section id="money-levers">
-      <h2>Levers to Save Money</h2>
-
-      <label>Extra Repayments: $<span id="extraRepayDisplay">0</span>
-        <input type="range" id="extraRepay" min="0" max="2000" step="10" value="0">
-      </label><br>
-      <label>Offset Account: $<span id="offsetDisplay">0</span>
-        <input type="range" id="offset" min="0" max="500000" step="10000" value="0">
-      </label><br>
-      <label>Lump Sum Payment: $<span id="lumpSumDisplay">0</span>
-        <input type="range" id="lumpSum" min="0" max="600000" step="1000" value="0">
-      </label><br>
-
-      <label>Repayment Frequency:
-        <select id="repaymentFrequency">
-          <option value="monthly">Monthly</option>
-          <option value="fortnightly">Fortnightly</option>
-          <option value="weekly">Weekly</option>
-        </select>
-      </label>
-    </section>
-
-    <!-- Section 3: Results -->
-    <section id="results">
-      <h2>Your Results</h2>
-      <p><strong>Regular Repayment:</strong> $<span id="regularRepayment">0</span> per <span id="repaymentPeriod">month</span></p>
-      <p><strong>Total Interest:</strong> $<span id="totalInterest">0</span></p>
-      <p><strong>Time Saved:</strong> <span id="timeSaved">0</span> years</p>
-      <p><strong>Interest Saved:</strong> $<span id="interestSaved">0</span></p>
-    </section>
-
-    <!-- Section 4: Charts & Tables -->
-    <section id="charts">
-      <h2>Repayment Chart</h2>
-      <canvas id="repaymentChart" width="400" height="200"></canvas>
-    </section>
-
-    <section id="amortisation">
-      <h2>Amortisation Schedule</h2>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Opening Balance</th>
-            <th>Repayment</th>
-            <th>Principal</th>
-            <th>Interest</th>
-            <th>Closing Balance</th>
-          </tr>
-        </thead>
-        <tbody id="amortisationTable">
-          <!-- Rows will be inserted here with JS -->
-        </tbody>
-      </table>
-    </section>
-  </main>
-  
-<script>
 // ------------------------------
 // Core Loan Repayment Calculator
 // ------------------------------
 
-// Utility: convert % to decimal
+// Utility: convert % to decimal (monthly rate)
 function rateToDecimal(annualRate) {
-  return (annualRate / 100) / 12; // monthly rate
+  return (annualRate / 100) / 12;
 }
 
 // Calculate base monthly repayment
@@ -111,33 +13,39 @@ function calculateMonthlyRepayment(loanAmount, annualRate, years) {
   const r = rateToDecimal(annualRate);
 
   if (r === 0) return loanAmount / n; // no interest edge case
-
   return loanAmount * r / (1 - Math.pow(1 + r, -n));
 }
 
-// Hook into your HTML inputs
+// Update results safely
 function updateResults() {
-  const loanAmount = parseFloat(document.querySelector('[placeholder="600000"]').value) || 0;
-  const loanTerm   = parseFloat(document.querySelector('[placeholder="30"]').value) || 30;
-  const interest   = parseFloat(document.querySelector('[placeholder="6"]').value) || 6;
+  // Grab values from DOM by ID
+  const loanAmount = parseFloat(document.getElementById("loanValue").value) || 0;
+  const loanTerm   = parseFloat(document.getElementById("loanTerm").value) || 30;
+  const interest   = parseFloat(document.getElementById("interestRate").value) || 6;
 
+  // Calculate
   const monthly = calculateMonthlyRepayment(loanAmount, interest, loanTerm);
   const total = monthly * loanTerm * 12;
   const totalInterest = total - loanAmount;
 
-  // Update the results section
-  document.getElementById('regularRepayment').textContent = monthly.toFixed(2);
-  document.getElementById('repaymentPeriod').textContent = 'month';
-  document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
-  document.getElementById('timeSaved').textContent = 0;
-  document.getElementById('interestSaved').textContent = 0;
+  // Push results into DOM
+  document.getElementById("regularRepayment").textContent = monthly.toFixed(2);
+  document.getElementById("repaymentPeriod").textContent = "month";
+  document.getElementById("totalInterest").textContent = totalInterest.toFixed(2);
+  document.getElementById("timeSaved").textContent = 0;
+  document.getElementById("interestSaved").textContent = 0;
 }
 
-// Auto-update when page loads
-document.addEventListener('DOMContentLoaded', updateResults);
+// ------------------------------
+// Init
+// ------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  // Run once on page load
+  updateResults();
 
-</script>
-
-  <script src="script.js"></script>
-</body>
-</html>
+  // Re-run when inputs change
+  ["loanValue", "loanTerm", "interestRate"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateResults);
+  });
+});
