@@ -1,10 +1,11 @@
+<script>
 // ------------------------------
-// Core Loan Repayment Calculator
+// Loan Calculator with Frequency & Sliders
 // ------------------------------
 
-// Utility: convert % to decimal (monthly rate)
+// Utility: convert % to decimal
 function rateToDecimal(annualRate) {
-  return (annualRate / 100) / 12;
+  return (annualRate / 100) / 12; // monthly rate
 }
 
 // Calculate base monthly repayment
@@ -13,39 +14,60 @@ function calculateMonthlyRepayment(loanAmount, annualRate, years) {
   const r = rateToDecimal(annualRate);
 
   if (r === 0) return loanAmount / n; // no interest edge case
+
   return loanAmount * r / (1 - Math.pow(1 + r, -n));
 }
 
-// Update results safely
 function updateResults() {
-  // Grab values from DOM by ID
-  const loanAmount = parseFloat(document.getElementById("loanValue").value) || 0;
-  const loanTerm   = parseFloat(document.getElementById("loanTerm").value) || 30;
-  const interest   = parseFloat(document.getElementById("interestRate").value) || 6;
+  const loanAmount = parseFloat(document.getElementById('loanValue').value) || 0;
+  const loanTerm   = parseFloat(document.getElementById('loanTerm').value) || 30;
+  const interest   = parseFloat(document.getElementById('interestRate').value) || 6;
 
-  // Calculate
-  const monthly = calculateMonthlyRepayment(loanAmount, interest, loanTerm);
-  const total = monthly * loanTerm * 12;
-  const totalInterest = total - loanAmount;
+  // Slider values
+  const extraRepay = parseFloat(document.getElementById('extraRepay').value) || 0;
+  const offset     = parseFloat(document.getElementById('offset').value) || 0;
+  const lumpSum    = parseFloat(document.getElementById('lumpSum').value) || 0;
 
-  // Push results into DOM
-  document.getElementById("regularRepayment").textContent = monthly.toFixed(2);
-  document.getElementById("repaymentPeriod").textContent = "month";
-  document.getElementById("totalInterest").textContent = totalInterest.toFixed(2);
-  document.getElementById("timeSaved").textContent = 0;
-  document.getElementById("interestSaved").textContent = 0;
-}
+  // Repayment frequency
+  const frequency = document.getElementById('repaymentFrequency').value;
 
-// ------------------------------
-// Init
-// ------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  // Run once on page load
-  updateResults();
+  // Adjust loan amount for lump sum + offset
+  const adjustedLoan = Math.max(loanAmount - lumpSum - offset, 0);
 
-  // Re-run when inputs change
-  ["loanValue", "loanTerm", "interestRate"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("input", updateResults);
-  });
-});
+  // Base monthly repayment
+  let monthly = calculateMonthlyRepayment(adjustedLoan, interest, loanTerm);
+
+  // Add extra repayment (applied per chosen frequency)
+  let repayment = monthly;
+  let periodLabel = "month";
+
+  if (frequency === "fortnightly") {
+    repayment = (monthly * 12 / 26);
+    periodLabel = "fortnight";
+    repayment += extraRepay; // extra repay per fortnight
+  } else if (frequency === "weekly") {
+    repayment = (monthly * 12 / 52);
+    periodLabel = "week";
+    repayment += extraRepay; // extra repay per week
+  } else {
+    repayment = monthly + extraRepay; // extra repay per month
+  }
+
+  // Total interest estimate (very simplified)
+  const total = repayment * loanTerm * (frequency === "monthly" ? 12 : frequency === "fortnightly" ? 26 : 52);
+  const totalInterest = total - adjustedLoan;
+
+  // Savings compared to base loan
+  const baseTotal = monthly * loanTerm * 12;
+  const baseInterest = baseTotal - loanAmount;
+  const interestSaved = baseInterest - totalInterest;
+
+  // Update the results section
+  document.getElementById('regularRepayment').textContent = repayment.toFixed(2);
+  document.getElementById('repaymentPeriod').textContent = periodLabel;
+  document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
+  document.getElementById('timeSaved').textContent = (interestSaved > 0 ? (interestSaved / baseInterest * loanTerm).toFixed(1) : 0);
+  document.getElementById('interestSaved').textContent = interestSaved.toFixed(2);
+
+  // Update the little spans under sliders
+  document.get
