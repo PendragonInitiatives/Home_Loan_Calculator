@@ -1,101 +1,800 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PM Project Change Loan Calculator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM Project Change - Home Loan Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #181c40;
+            --accent: #d8bd7d;
+            --secondary: #b9c7d9;
+            --highlight: #faf2aa;
+            --blue: #5290c9;
+        }
+        
+        body { 
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, #2a2f5a 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .roboto { font-family: 'Roboto', sans-serif; }
+        
+        .glass-effect { 
+            backdrop-filter: blur(10px); 
+            background: rgba(216, 189, 125, 0.1);
+            border: 1px solid rgba(216, 189, 125, 0.2);
+            border-radius: 24px;
+        }
+        
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 
+            0%, 100% { transform: translateY(0px); } 
+            50% { transform: translateY(-10px); } 
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(216, 189, 125, 0.3);
+            outline: none;
+            width: 100%;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(24, 28, 64, 0.5);
+            border: 1px solid rgba(216, 189, 125, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .result-card {
+            background: rgba(216, 189, 125, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 16px;
+        }
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-card {
+            background: rgba(24, 28, 64, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(216, 189, 125, 0.2);
+            margin-bottom: 16px;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        
+        @media (max-width: 1024px) {
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            body { padding: 12px; }
+        }
+
+        .floating-bg {
+            position: fixed;
+            top: 80px;
+            left: 40px;
+            width: 128px;
+            height: 128px;
+            background: rgba(216, 189, 125, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .floating-bg:nth-child(2) {
+            top: 160px;
+            right: 80px;
+            left: auto;
+            width: 96px;
+            height: 96px;
+            background: rgba(82, 144, 201, 0.2);
+            animation-delay: -2s;
+        }
+        .floating-bg:nth-child(3) {
+            bottom: 128px;
+            left: 25%;
+            top: auto;
+            width: 160px;
+            height: 160px;
+            background: rgba(185, 199, 217, 0.1);
+            animation-delay: -4s;
+        }
+    </style>
 </head>
 <body>
+    <!-- Floating Background Elements -->
+    <div class="floating-bg"></div>
+    <div class="floating-bg"></div>
+    <div class="floating-bg"></div>
 
-  <header>
-    <h1>🏡 PM Project Change Loan Calculator</h1>
-    <p>Explore how repayments, offsets, lump sums, and frequency tweaks can save you time and money.</p>
-  </header>
+    <div style="position: relative; z-index: 10; max-width: 1200px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 48px;">
+            <h1 style="font-size: 3.5rem; font-weight: bold; margin-bottom: 16px;" class="roboto">
+                🏠 PM Project Change
+            </h1>
+            <p style="font-size: 1.25rem; color: var(--secondary); margin-bottom: 8px;">Home Loan Repayments Calculator</p>
+            <div style="width: 96px; height: 4px; background: var(--accent); margin: 0 auto; border-radius: 2px;"></div>
+        </div>
 
-  <main>
-    <!-- Section 1: Loan Inputs -->
-    <section id="loan-inputs">
-      <h2>Loan Details</h2>
-      <label>Property Value: <input type="number" id="propertyValue" value="800000"></label><br>
-      <label>Loan Value: <input type="number" id="loanValue" value="600000"></label><br>
-      <label>Loan Type:
-        <select id="loanType">
-          <option>Variable Owner</option>
-          <option>Fixed Owner</option>
-          <option>Variable IP</option>
-          <option>Fixed IP</option>
-        </select>
-      </label><br>
-      <label>Loan Term (years): <input type="number" id="loanTerm" value="30" min="15" max="30"></label><br>
-      <label>Interest Rate (%): <input type="number" id="interestRate" value="6" step="0.1" min="2" max="10"></label><br>
-      <label>Repayment Type:
-        <select id="repaymentType">
-          <option>P&amp;I</option>
-          <option>Interest Only</option>
-        </select>
-      </label>
-    </section>
+        <!-- Section 1: Basic Loan Details -->
+        <div class="glass-effect" style="padding: 48px; margin-bottom: 48px;">
+            <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 32px; display: flex; align-items: center;" class="roboto">
+                <span style="width: 40px; height: 40px; background: var(--accent); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 1.125rem; font-weight: bold;">1</span>
+                Basic Loan Details
+            </h2>
 
-    <!-- Section 2: Money Saving Levers -->
-    <section id="money-levers">
-      <h2>Levers to Save Money</h2>
+            <div class="grid-3">
+                <!-- Property Value -->
+                <div>
+                    <label style="display: block; color: var(--secondary); font-size: 0.875rem; font-weight: 600; margin-bottom: 12px;">Property Value</label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: bold;">$</span>
+                        <input type="text" id="propertyValue" value="800,000" class="input-field" style="padding-left: 40px;" oninput="formatCurrency(this); calculateAll()">
+                    </div>
+                </div>
 
-      <label>Extra Repayments: $<span id="extraRepayDisplay">0</span>
-        <input type="range" id="extraRepay" min="0" max="2000" step="10" value="0">
-      </label><br>
-      <label>Offset Account: $<span id="offsetDisplay">0</span>
-        <input type="range" id="offset" min="0" max="500000" step="10000" value="0">
-      </label><br>
-      <label>Lump Sum Payment: $<span id="lumpSumDisplay">0</span>
-        <input type="range" id="lumpSum" min="0" max="600000" step="1000" value="0">
-      </label><br>
+                <!-- Loan Amount -->
+                <div>
+                    <label style="display: block; color: var(--secondary); font-size: 0.875rem; font-weight: 600; margin-bottom: 12px;">Loan Amount</label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: bold;">$</span>
+                        <input type="text" id="loanAmount" value="640,000" class="input-field" style="padding-left: 40px;" oninput="formatCurrency(this); calculateAll()">
+                    </div>
+                </div>
 
-      <label>Repayment Frequency:
-        <select id="repaymentFrequency">
-          <option value="monthly">Monthly</option>
-          <option value="fortnightly">Fortnightly</option>
-          <option value="weekly">Weekly</option>
-        </select>
-      </label>
-    </section>
+                <!-- Loan Type -->
+                <div>
+                    <label style="display: block; color: var(--secondary); font-size: 0.875rem; font-weight: 600; margin-bottom: 12px;">Loan Type</label>
+                    <select id="loanType" class="input-field" onchange="calculateAll()">
+                        <option value="variable-owner">Variable Owner Occupier</option>
+                        <option value="fixed-owner">Fixed Owner Occupier</option>
+                        <option value="variable-ip">Variable Investment Property</option>
+                        <option value="fixed-ip">Fixed Investment Property</option>
+                    </select>
+                </div>
 
-    <!-- Section 3: Results -->
-    <section id="results">
-      <h2>Your Results</h2>
-      <p><strong>Regular Repayment:</strong> $<span id="regularRepayment">0</span> per <span id="repaymentPeriod">month</span></p>
-      <p><strong>Total Interest:</strong> $<span id="totalInterest">0</span></p>
-      <p><strong>Time Saved:</strong> <span id="timeSaved">0</span> years</p>
-      <p><strong>Interest Saved:</strong> $<span id="interestSaved">0</span></p>
-    </section>
+                <!-- Loan Term -->
+                <div>
+                    <label style="display: block; color: var(--secondary); font-size: 0.875rem; font-weight: 600; margin-bottom: 12px;">Loan Term</label>
+                    <select id="loanTerm" class="input-field" onchange="calculateAll()">
+                        <option value="15">15 years</option>
+                        <option value="20">20 years</option>
+                        <option value="25">25 years</option>
+                        <option value="30" selected>30 years</option>
+                    </select>
+                </div>
 
-    <!-- Section 4: Charts & Tables -->
-    <section id="charts">
-      <h2>Repayment Chart</h2>
-      <canvas id="repaymentChart" width="400" height="200"></canvas>
-    </section>
+                <!-- Interest Rate -->
+                <div>
+                    <label style="display: block; color: var(--secondary); font-size: 0.875rem; font-weight: 600; margin-bottom: 12px;">Interest Rate (%)</label>
+                    <input type="number" id="interestRate" value="6.5" step="0.01" min="2" max="10" class="input-field" oninput="calculateAll()">
+                </div>
 
-    <section id="amortisation">
-      <h2>Amortisation Schedule</h2>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Opening Balance</th>
-            <th>Repayment</th>
-            <th>Principal</th>
-            <th>Interest</th>
-            <th>Closing Balance</th>
-          </tr>
-        </thead>
-        <tbody id="amortisationTable">
-          <!-- Rows will be inserted here with JS -->
-        </tbody>
-      </table>
-    </section>
-  </main>
+                <!-- Repayment Type -->
+                <div>
+                    <label style="display: block; color: var(--secondary); font-size: 0.875rem; font-weight: 600; margin-bottom: 12px;">Repayment Type</label>
+                    <select id="repaymentType" class="input-field" onchange="calculateAll()">
+                        <option value="pi">Principal & Interest</option>
+                        <option value="io">Interest Only</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-  <!-- Only load ONE script file -->
-  <script src="script.js"></script>
+        <!-- Section 2: Money Saving Levers -->
+        <div class="glass-effect" style="padding: 48px; margin-bottom: 48px;">
+            <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 32px; display: flex; align-items: center;" class="roboto">
+                <span style="width: 40px; height: 40px; background: var(--accent); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 1.125rem; font-weight: bold;">2</span>
+                Money Saving Levers
+            </h2>
+
+            <div class="grid-2">
+                <!-- Extra Repayments -->
+                <div class="section-card">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600;" class="roboto">💰 Extra Repayments</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="showInfo('extraInfo')" class="btn" style="background: var(--blue);">i</button>
+                            <button onclick="showWarning('extraWarning')" class="btn" style="background: #eab308;">⚠</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: var(--secondary); font-size: 0.875rem; margin-bottom: 8px;">Extra Amount: $<span id="extraAmount">100</span></label>
+                        <div style="position: relative; margin-bottom: 12px;">
+                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: bold;">$</span>
+                            <input type="text" id="extraInput" value="100" class="input-field" style="padding-left: 40px;" oninput="updateExtraFromInput(this.value)">
+                        </div>
+                        <input type="range" id="extraSlider" min="0" max="2000" step="10" value="100" class="slider" oninput="updateExtra(this.value)">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: var(--secondary); font-size: 0.875rem; margin-bottom: 8px;">Frequency</label>
+                        <select id="extraFrequency" class="input-field" onchange="calculateAll()">
+                            <option value="weekly">Weekly</option>
+                            <option value="fortnightly">Fortnightly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                    </div>
+                    <div id="extraSavings" style="color: var(--highlight); font-size: 0.875rem;"></div>
+                </div>
+
+                <!-- Offset Account -->
+                <div class="section-card">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600;" class="roboto">🏦 Offset Account</h3>
+                        <button onclick="showInfo('offsetInfo')" class="btn" style="background: var(--blue);">i</button>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: var(--secondary); font-size: 0.875rem; margin-bottom: 8px;">Offset Amount: $<span id="offsetAmount">0</span></label>
+                        <div style="position: relative; margin-bottom: 12px;">
+                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: bold;">$</span>
+                            <input type="text" id="offsetInput" value="0" class="input-field" style="padding-left: 40px;" oninput="updateOffsetFromInput(this.value)">
+                        </div>
+                        <input type="range" id="offsetSlider" min="0" max="500000" step="10000" value="0" class="slider" oninput="updateOffset(this.value)">
+                    </div>
+                    <div id="offsetSavings" style="color: var(--highlight); font-size: 0.875rem;"></div>
+                </div>
+
+                <!-- Lump Sum -->
+                <div class="section-card">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600;" class="roboto">💵 Lump Sum Payment</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="showInfo('lumpSumInfo')" class="btn" style="background: var(--blue);">i</button>
+                            <button onclick="showWarning('lumpSumWarning')" class="btn" style="background: #eab308;">⚠</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; color: var(--secondary); font-size: 0.875rem; margin-bottom: 8px;">Lump Sum: $<span id="lumpSumAmount">0</span></label>
+                        <div style="position: relative; margin-bottom: 12px;">
+                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: bold;">$</span>
+                            <input type="text" id="lumpSumInput" value="0" class="input-field" style="padding-left: 40px;" oninput="updateLumpSumFromInput(this.value)">
+                        </div>
+                        <input type="range" id="lumpSumSlider" min="0" max="640000" step="1000" value="0" class="slider" oninput="updateLumpSum(this.value)">
+                    </div>
+                    <div id="lumpSumSavings" style="color: var(--highlight); font-size: 0.875rem;"></div>
+                </div>
+
+                <!-- Repayment Frequency -->
+                <div class="section-card">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600;" class="roboto">📅 Repayment Frequency</h3>
+                        <button onclick="showInfo('frequencyInfo')" class="btn" style="background: var(--blue);">i</button>
+                    </div>
+                    <select id="repaymentFrequency" class="input-field" style="margin-bottom: 16px;" onchange="calculateAll()">
+                        <option value="monthly">Monthly</option>
+                        <option value="fortnightly">Fortnightly</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                    <div id="frequencySavings" style="color: var(--highlight); font-size: 0.875rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Results -->
+        <div class="glass-effect" style="padding: 48px;">
+            <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 32px; display: flex; align-items: center;" class="roboto">
+                <span style="width: 40px; height: 40px; background: var(--accent); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 1.125rem; font-weight: bold;">3</span>
+                Your Results
+            </h2>
+
+            <!-- Loan Summary -->
+            <div class="grid-3" style="margin-bottom: 32px;">
+                <div class="result-card">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--accent); margin-bottom: 8px;" class="roboto">Regular Repayment</h3>
+                    <p style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4px;">$<span id="regularRepayment">0</span></p>
+                    <p style="font-size: 0.875rem; color: var(--secondary);">per <span id="repaymentPeriod">month</span></p>
+                </div>
+                <div class="result-card" style="background: rgba(82, 144, 201, 0.2);">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--blue); margin-bottom: 8px;" class="roboto">Total Interest</h3>
+                    <p style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4px;">$<span id="totalInterest">0</span></p>
+                    <p style="font-size: 0.875rem; color: var(--secondary);">over loan term</p>
+                </div>
+                <div class="result-card" style="background: rgba(250, 242, 170, 0.2);">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--highlight); margin-bottom: 8px;" class="roboto">Time Saved</h3>
+                    <p style="font-size: 1.5rem; font-weight: bold; margin-bottom: 4px;"><span id="timeSaved">0</span> years</p>
+                    <p style="font-size: 0.875rem; color: var(--secondary);">with optimizations</p>
+                </div>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="section-card" style="margin-bottom: 32px;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 16px;" class="roboto">📊 Comparison Summary</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 0.875rem;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(216, 189, 125, 0.3);">
+                                <th style="text-align: left; padding: 12px 0; color: var(--secondary);">Scenario</th>
+                                <th style="text-align: right; padding: 12px 0; color: var(--secondary);">Repayment</th>
+                                <th style="text-align: right; padding: 12px 0; color: var(--secondary);">Total Interest</th>
+                                <th style="text-align: right; padding: 12px 0; color: var(--secondary);">Loan Term</th>
+                                <th style="text-align: right; padding: 12px 0; color: var(--secondary);">Interest Saved</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTable">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="section-card">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 16px;" class="roboto">📈 Repayment Breakdown</h3>
+                <canvas id="repaymentChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h3 style="font-size: 1.5rem; font-weight: bold; color: #374151; margin-bottom: 16px; display: flex; align-items: center;">
+                <span style="width: 32px; height: 32px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white; font-size: 0.875rem;">i</span>
+                Information
+            </h3>
+            <div id="infoContent" style="color: #6b7280; margin-bottom: 24px; line-height: 1.6;"></div>
+            <button onclick="closeInfoModal()" style="width: 100%; background: var(--primary); color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                Got it!
+            </button>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <h3 style="font-size: 1.5rem; font-weight: bold; color: #374151; margin-bottom: 16px; display: flex; align-items: center;">
+                <span style="width: 32px; height: 32px; background: #eab308; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white; font-size: 0.875rem;">⚠</span>
+                Important Warning
+            </h3>
+            <div id="warningContent" style="color: #6b7280; margin-bottom: 24px; line-height: 1.6;"></div>
+            <button onclick="closeWarningModal()" style="width: 100%; background: #eab308; color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                Understood
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                input.value = parseInt(value).toLocaleString();
+            }
+        }
+
+        function parseCurrency(value) {
+            return parseInt(value.replace(/[^\d]/g, '')) || 0;
+        }
+
+        function updateExtra(value) {
+            document.getElementById('extraAmount').textContent = value;
+            document.getElementById('extraInput').value = value;
+            calculateAll();
+        }
+
+        function updateExtraFromInput(value) {
+            const numValue = parseInt(value.replace(/[^\d]/g, '')) || 0;
+            const clampedValue = Math.min(Math.max(numValue, 0), 2000);
+            document.getElementById('extraAmount').textContent = clampedValue;
+            document.getElementById('extraSlider').value = clampedValue;
+            if (numValue !== clampedValue) {
+                document.getElementById('extraInput').value = clampedValue;
+            }
+            calculateAll();
+        }
+
+        function updateOffset(value) {
+            document.getElementById('offsetAmount').textContent = parseInt(value).toLocaleString();
+            document.getElementById('offsetInput').value = parseInt(value).toLocaleString();
+            calculateAll();
+        }
+
+        function updateOffsetFromInput(value) {
+            const numValue = parseCurrency(value);
+            const clampedValue = Math.min(Math.max(numValue, 0), 500000);
+            document.getElementById('offsetAmount').textContent = clampedValue.toLocaleString();
+            document.getElementById('offsetSlider').value = clampedValue;
+            if (numValue !== clampedValue) {
+                document.getElementById('offsetInput').value = clampedValue.toLocaleString();
+            }
+            calculateAll();
+        }
+
+        function updateLumpSum(value) {
+            document.getElementById('lumpSumAmount').textContent = parseInt(value).toLocaleString();
+            document.getElementById('lumpSumInput').value = parseInt(value).toLocaleString();
+            calculateAll();
+        }
+
+        function updateLumpSumFromInput(value) {
+            const numValue = parseCurrency(value);
+            const maxValue = parseCurrency(document.getElementById('loanAmount').value);
+            const clampedValue = Math.min(Math.max(numValue, 0), maxValue);
+            document.getElementById('lumpSumAmount').textContent = clampedValue.toLocaleString();
+            document.getElementById('lumpSumSlider').value = clampedValue;
+            document.getElementById('lumpSumSlider').max = maxValue;
+            if (numValue !== clampedValue) {
+                document.getElementById('lumpSumInput').value = clampedValue.toLocaleString();
+            }
+            calculateAll();
+        }
+
+        function showInfo(type) {
+            const infoTexts = {
+                extraInfo: "Making extra repayments means paying more than the minimum required, which directly reduces the principal (loan balance) so less interest is charged.<br><br>Even small amounts (like $10 a week) create a snowball effect because every dollar saved on interest allows future repayments to chip away at the principal faster, shortening the loan term significantly.",
+                offsetInfo: "An offset account is a savings/transaction account linked to your loan, where the balance is subtracted from your loan when calculating interest, so you only pay interest on the difference.<br><br>This means more of your repayment goes to paying down the principal (the loan itself), which reduces the loan term.",
+                lumpSumInfo: "A lump sum repayment is a one-off payment made on top of your regular repayments, which goes straight to reducing the principal (loan balance) and immediately lowers the interest charged.<br><br>This creates a snowball effect, as the reduced interest means future repayments knock off the principal faster, cutting years off the loan term.",
+                frequencyInfo: "Paying your loan fortnightly or weekly instead of monthly is a simple timing tweak since there are 26 fortnights or 52 weeks in a year, you end up making the equivalent of 13 monthly payments instead of 12.<br><br>This extra payment quietly chips away at the principal, which reduces interest and can save you tens of thousands over the life of the loan, while also shortening the loan term."
+            };
+            
+            document.getElementById('infoContent').innerHTML = infoTexts[type];
+            document.getElementById('infoModal').classList.add('show');
+        }
+
+        function showWarning(type) {
+            const warningText = "Be careful with a redraw facility. The bank can change the rules, freeze or absorb redraw funds, and if you later turn the home into an investment property, money taken out of redraw can reduce your tax benefits.<br><br>An offset account keeps your cash separate and under your control, even though it takes an extra mental calculation — it's usually the safer long-term option.";
+            
+            document.getElementById('warningContent').innerHTML = warningText;
+            document.getElementById('warningModal').classList.add('show');
+        }
+
+        function closeInfoModal() {
+            document.getElementById('infoModal').classList.remove('show');
+        }
+
+        function closeWarningModal() {
+            document.getElementById('warningModal').classList.remove('show');
+        }
+
+        function calculateMonthlyPayment(principal, rate, term) {
+            const monthlyRate = rate / 100 / 12;
+            const numPayments = term * 12;
+            
+            if (rate === 0) return principal / numPayments;
+            
+            return principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                   (Math.pow(1 + monthlyRate, numPayments) - 1);
+        }
+
+        function calculateAll() {
+            const loanAmount = parseCurrency(document.getElementById('loanAmount').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+            const loanTerm = parseInt(document.getElementById('loanTerm').value) || 30;
+            const repaymentType = document.getElementById('repaymentType').value;
+            const repaymentFreq = document.getElementById('repaymentFrequency').value;
+            const extraAmount = parseInt(document.getElementById('extraAmount').textContent) || 0;
+            const offsetAmount = parseCurrency(document.getElementById('offsetAmount').textContent);
+            const lumpSum = parseCurrency(document.getElementById('lumpSumAmount').textContent);
+
+            // Update lump sum slider max
+            document.getElementById('lumpSumSlider').max = loanAmount;
+
+            // Calculate base monthly payment
+            let monthlyPayment;
+            if (repaymentType === 'io') {
+                monthlyPayment = (loanAmount * interestRate / 100) / 12;
+            } else {
+                monthlyPayment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
+            }
+
+            // Adjust for frequency
+            let payment, paymentsPerYear;
+            switch (repaymentFreq) {
+                case 'weekly':
+                    payment = (monthlyPayment * 12) / 52;
+                    paymentsPerYear = 52;
+                    document.getElementById('repaymentPeriod').textContent = 'week';
+                    break;
+                case 'fortnightly':
+                    payment = (monthlyPayment * 12) / 26;
+                    paymentsPerYear = 26;
+                    document.getElementById('repaymentPeriod').textContent = 'fortnight';
+                    break;
+                default:
+                    payment = monthlyPayment;
+                    paymentsPerYear = 12;
+                    document.getElementById('repaymentPeriod').textContent = 'month';
+            }
+
+            // Calculate with optimizations
+            const effectiveLoan = Math.max(0, loanAmount - offsetAmount - lumpSum);
+            let optimizedPayment = payment;
+            
+            if (extraAmount > 0) {
+                const extraFreq = document.getElementById('extraFrequency').value;
+                let extraPerPayment = 0;
+                
+                switch (extraFreq) {
+                    case 'weekly':
+                        extraPerPayment = extraAmount * 52 / paymentsPerYear;
+                        break;
+                    case 'fortnightly':
+                        extraPerPayment = extraAmount * 26 / paymentsPerYear;
+                        break;
+                    case 'monthly':
+                        extraPerPayment = extraAmount * 12 / paymentsPerYear;
+                        break;
+                }
+                optimizedPayment += extraPerPayment;
+            }
+
+            // Calculate loan term and interest with optimizations
+            let remainingBalance = effectiveLoan;
+            let totalInterest = 0;
+            let payments = 0;
+            const periodRate = interestRate / 100 / paymentsPerYear;
+
+            if (repaymentType === 'pi' && effectiveLoan > 0) {
+                while (remainingBalance > 0.01 && payments < loanTerm * paymentsPerYear) {
+                    const interestPayment = remainingBalance * periodRate;
+                    const principalPayment = Math.min(optimizedPayment - interestPayment, remainingBalance);
+                    
+                    if (principalPayment <= 0) break;
+                    
+                    totalInterest += interestPayment;
+                    remainingBalance -= principalPayment;
+                    payments++;
+                }
+            } else {
+                // Interest only calculation
+                totalInterest = (effectiveLoan * interestRate / 100) * loanTerm;
+                payments = loanTerm * paymentsPerYear;
+            }
+
+            const actualTerm = payments / paymentsPerYear;
+            const timeSaved = Math.max(0, loanTerm - actualTerm);
+
+            // Calculate base scenario for comparison
+            const basePayment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
+            const baseInterest = (basePayment * loanTerm * 12) - loanAmount;
+            const interestSaved = Math.max(0, baseInterest - totalInterest);
+
+            // Update display
+            document.getElementById('regularRepayment').textContent = Math.round(payment).toLocaleString();
+            document.getElementById('totalInterest').textContent = Math.round(totalInterest).toLocaleString();
+            document.getElementById('timeSaved').textContent = timeSaved.toFixed(1);
+
+            // Update comparison table
+            updateComparisonTable(payment, totalInterest, actualTerm, interestSaved, basePayment, baseInterest, loanTerm);
+
+            // Update frequency savings
+            updateFrequencySavings(repaymentFreq, monthlyPayment, loanAmount, interestRate, loanTerm);
+
+            // Update individual savings
+            updateIndividualSavings(loanAmount, interestRate, loanTerm, basePayment);
+
+            // Update chart
+            updateChart(loanAmount, totalInterest);
+        }
+
+        function updateComparisonTable(payment, totalInterest, actualTerm, interestSaved, basePayment, baseInterest, baseTerm) {
+            const table = document.getElementById('comparisonTable');
+            table.innerHTML = `
+                <tr style="border-bottom: 1px solid rgba(216, 189, 125, 0.2);">
+                    <td style="padding: 12px 0; color: white;">Standard Loan</td>
+                    <td style="padding: 12px 0; text-align: right; color: white;">${Math.round(basePayment).toLocaleString()}</td>
+                    <td style="padding: 12px 0; text-align: right; color: white;">${Math.round(baseInterest).toLocaleString()}</td>
+                    <td style="padding: 12px 0; text-align: right; color: white;">${baseTerm} years</td>
+                    <td style="padding: 12px 0; text-align: right; color: var(--secondary);">-</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 0; color: var(--accent); font-weight: 600;">With Optimizations</td>
+                    <td style="padding: 12px 0; text-align: right; color: var(--accent); font-weight: 600;">${Math.round(payment).toLocaleString()}</td>
+                    <td style="padding: 12px 0; text-align: right; color: var(--accent); font-weight: 600;">${Math.round(totalInterest).toLocaleString()}</td>
+                    <td style="padding: 12px 0; text-align: right; color: var(--accent); font-weight: 600;">${actualTerm.toFixed(1)} years</td>
+                    <td style="padding: 12px 0; text-align: right; color: var(--highlight); font-weight: 600;">${Math.round(interestSaved).toLocaleString()}</td>
+                </tr>
+            `;
+        }
+
+        function updateFrequencySavings(frequency, monthlyPayment, loanAmount, interestRate, loanTerm) {
+            const savingsDiv = document.getElementById('frequencySavings');
+            
+            if (frequency === 'monthly') {
+                savingsDiv.innerHTML = 'You are making standard monthly repayments.';
+                return;
+            }
+
+            // Calculate savings estimate
+            let paymentsPerYear = frequency === 'weekly' ? 52 : 26;
+            let payment = (monthlyPayment * 12) / paymentsPerYear;
+            let annualRepayments = payment * paymentsPerYear;
+            let monthlyAnnualRepayments = monthlyPayment * 12;
+            let extraPerYear = annualRepayments - monthlyAnnualRepayments;
+            
+            // Simple estimate of years saved
+            let estimatedYearsSaved = Math.min(5, (extraPerYear * loanTerm) / (monthlyPayment * 12));
+
+            savingsDiv.innerHTML = `By paying ${frequency}, you effectively make 13 months of payments per year. This could save you approximately ${estimatedYearsSaved.toFixed(1)} years and significant interest.`;
+        }
+
+        function updateIndividualSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment) {
+            // Calculate extra repayments savings
+            const extraAmount = parseInt(document.getElementById('extraAmount').textContent);
+            if (extraAmount > 0) {
+                const extraFreq = document.getElementById('extraFrequency').value;
+                let extraPerMonth = 0;
+                switch (extraFreq) {
+                    case 'weekly': extraPerMonth = extraAmount * 52 / 12; break;
+                    case 'fortnightly': extraPerMonth = extraAmount * 26 / 12; break;
+                    case 'monthly': extraPerMonth = extraAmount; break;
+                }
+                
+                const extraSavings = calculateSavings(loanAmount, interestRate, loanTerm, baseMonthlyPayment + extraPerMonth);
+                document.getElementById('extraSavings').innerHTML = `💡 Save ${Math.round(extraSavings.interestSaved).toLocaleString()} and ${extraSavings.timeSaved.toFixed(1)} years`;
+            } else {
+                document.getElementById('extraSavings').innerHTML = '';
+            }
+            
+            // Calculate offset savings
+            const offsetAmount = parseCurrency(document.getElementById('offsetAmount').textContent);
+            if (offsetAmount > 0) {
+                const offsetSavings = calculateSavings(Math.max(0, loanAmount - offsetAmount), interestRate, loanTerm, baseMonthlyPayment);
+                document.getElementById('offsetSavings').innerHTML = `💡 Save ${Math.round(offsetSavings.interestSaved).toLocaleString()} and ${offsetSavings.timeSaved.toFixed(1)} years`;
+            } else {
+                document.getElementById('offsetSavings').innerHTML = '';
+            }
+            
+            // Calculate lump sum savings
+            const lumpSum = parseCurrency(document.getElementById('lumpSumAmount').textContent);
+            if (lumpSum > 0) {
+                const lumpSumSavings = calculateSavings(Math.max(0, loanAmount - lumpSum), interestRate, loanTerm, baseMonthlyPayment);
+                document.getElementById('lumpSumSavings').innerHTML = `💡 Save ${Math.round(lumpSumSavings.interestSaved).toLocaleString()} and ${lumpSumSavings.timeSaved.toFixed(1)} years`;
+            } else {
+                document.getElementById('lumpSumSavings').innerHTML = '';
+            }
+        }
+        
+        function calculateSavings(principal, rate, term, monthlyPayment) {
+            let remainingBalance = principal;
+            let totalInterest = 0;
+            let payments = 0;
+            const monthlyRate = rate / 100 / 12;
+            
+            while (remainingBalance > 0.01 && payments < term * 12) {
+                const interestPayment = remainingBalance * monthlyRate;
+                const principalPayment = Math.min(monthlyPayment - interestPayment, remainingBalance);
+                
+                if (principalPayment <= 0) break;
+                
+                totalInterest += interestPayment;
+                remainingBalance -= principalPayment;
+                payments++;
+            }
+            
+            const actualTerm = payments / 12;
+            const baseInterest = (monthlyPayment * term * 12) - principal;
+            
+            return {
+                interestSaved: Math.max(0, baseInterest - totalInterest),
+                timeSaved: Math.max(0, term - actualTerm)
+            };
+        }
+
+        function updateChart(principal, interest) {
+            const ctx = document.getElementById('repaymentChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Principal', 'Interest'],
+                    datasets: [{
+                        data: [principal, interest],
+                        backgroundColor: ['#d8bd7d', '#5290c9'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Open Sans'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize calculator
+        calculateAll();
+    </script>
 </body>
 </html>
